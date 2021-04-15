@@ -28,6 +28,8 @@ class TCardController {
   }
 
   get reset => state.reset;
+  get add => state.add;
+  get getCards => state.getCards;
 
   void dispose() {
     state = null;

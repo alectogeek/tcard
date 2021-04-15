@@ -39,6 +39,8 @@ class TCard extends StatefulWidget {
   /// How long does it have to wait until the next slide is sliable? less is quicker. 100 is fast enough. 500 is a bit slow.
   final int delaySlideFor;
 
+  final bool enableSwipe;
+
   const TCard({
     @required this.cards,
     this.controller,
@@ -46,6 +48,7 @@ class TCard extends StatefulWidget {
     this.onBack,
     this.onEnd,
     this.lockYAxis = false,
+    this.enableSwipe = true,
     this.slideSpeed = 20,
     this.delaySlideFor = 500,
     this.size = const Size(380, 400),
@@ -88,9 +91,16 @@ class TCardState extends State<TCard> with TickerProviderStateMixin {
 
     Widget rotate = Transform.rotate(
       angle: (math.pi / 180.0) * _frontCardRotation,
-      child: SizedBox.fromSize(
-        size: CardSizes.front(constraints),
-        child: child,
+      alignment: Alignment(0, 0.5),
+      child: Transform.translate(
+        offset: Offset(_frontCardRotation * 10, 0),
+        child: Align(
+            alignment: Alignment.topCenter,
+          child: SizedBox.fromSize(
+            size: CardSizes.front(constraints),
+            child: child,
+          ),
+        ),
       ),
     );
 
@@ -321,7 +331,19 @@ class TCardState extends State<TCard> with TickerProviderStateMixin {
     _resetFrontCard();
   }
 
+  void _addCards(List<Widget> cards) {
+    if (cards != null) {
+      _cards.addAll(cards);
+    }
+  }
+
+  List<Widget> _getCards() {
+    return _cards;
+  }
+
   get reset => _reset;
+  get add => _addCards;
+  get getCards => _getCards;
 
   // Stop animations
   void _stop() {
@@ -440,7 +462,7 @@ class TCardState extends State<TCard> with TickerProviderStateMixin {
               _middleCard(constraints),
               _frontCard(constraints),
               // 使用一个 SizedBox 覆盖父元素整个区域
-              _cardChangeController.status != AnimationStatus.forward
+              _cardChangeController.status != AnimationStatus.forward && widget.enableSwipe
                   ? SizedBox.expand(
                       child: GestureDetector(
                         onPanDown: (DragDownDetails details) {
